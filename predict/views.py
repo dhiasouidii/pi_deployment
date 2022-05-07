@@ -279,3 +279,6 @@ def detect_car(request):
                         safe=False)
 def dashboard_2(request):
     return render(request,"dashboard_2.html")
+
+def test(request):
+    return render(request,"index.html")
