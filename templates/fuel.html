@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block main %}
+    <!-- Modal -->
+    <div class="modal fade" id="exammarqueeModal" tabindex="-1" role="dialog" aria-labelledby="exammarqueeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exammarqueeModalLabel">Prediction Results</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h5 class="pt-3">Prediction:</h5>
+                    <div id="prediction"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <a class="btn btn-primary" href="/results" role="button">View DB</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container pt-5">
+        <div class="row justify-content-md-center">
+            <div class="col-md-4">
+                <h4>Fuel Consumption Prediction</h4>
+                <form action="" id="post-form">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="voiture">Voiture</label>
+                        <input type="text"  class="form-control" id="voiture" marqueaceholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="moteur">Moteur</label>
+                        <input type="text"  class="form-control" id="moteur" marqueaceholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="carburant">Carburant</label>
+                        <input type="text" class="form-control" id="carburant" marqueaceholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="marque">Marque</label>
+                        <input type="text" class="form-control" id="marque" marqueaceholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="cv">Nombre de chevaux</label>
+                        <input type="text" class="form-control" id="cv" marqueaceholder="" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Année</label>
+                        <input type="text" class="form-control" id="year" marqueaceholder="" required>
+                    </div>
+                    <button type="submit" value="Submit" class="btn btn-primary" data-toggle="modal"
+                            data-target="#exammarqueeModal">Submit
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).on('submit', '#post-form', function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:fuelpredict" %}',
+                data: {
+                    moteur: $('#moteur').val(),
+                    carburant: $('#carburant').val(),
+                    marque: $('#marque').val(),
+                    cv: $('#cv').val(),
+                    year: $('#year').val(),
+                    voiture: $('#voiture').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.forms["post-form"].reset();
+                    document.getElementById("prediction").innerHTML = json['result']
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends "base_template.html" %}
+{% block main %}
+    {% load static %}
+    <section class="listing-page">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-9 col-md-push-3" id="reviews">
+                    <div class="product-listing-m gray-bg" id="review">
+                        <div class="product-listing-content">
+                            <h5><a href="#">Reviews will be shown here!</a></h5>
+                        </div>
+                    </div>
+                </div>
+
+                <!--Side-Bar-->
+                <aside class="col-md-3 col-md-pull-9">
+                    <div class="sidebar_widget sidebar_search_wrap">
+                        <div class="widget_heading">
+                            <h5><i class="fa fa-filter" aria-hidden="true"></i> Find Your Dream Car </h5>
+                        </div>
+                        <div class="sidebar_filter">
+                            <form action="" id="post-form">
+                                {% csrf_token %}
+
+                                <div class="form-group select">
+                                    <select class="form-control" id="brand">
+                                        <option>Select Brand</option>
+                                        {% for brand in brands %}
+                                            <option value="{{ brand }}">{{ brand }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="form-group select">
+                                    <select class="form-control" id="model">
+                                        <option>Select Model</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-block">
+                                        <i class="fa fa-search" aria-hidden="true"></i> Search Car
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="sidebar_widget sell_car_quote">
+                            <div class="white-text div_zindex text-center">
+                                <h3>Find Your Car</h3>
+                                <p>Estimate a car's price now!</p>
+                                <a href="{% url "predict:index" %}" class="btn">Estimate <span class="angle_arrow"><i
+                                        class="fa fa-angle-right" aria-hidden="true"></i></span></a></div>
+                            <div class="dark-overlay"></div>
+                        </div>
+                    </div>
+                </aside>
+                <!--/Side-Bar-->
+            </div>
+        </div>
+    </section>
+
+    <script>
+        $("#brand").change(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:get_selected_model" %}',
+                data: {
+                    brand: $('#brand').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("model").innerHTML = "";
+                    select = document.getElementById("model")
+                    for (var i in json) {
+                        for (var j in json[i]) {
+                            $(select).append('<option value=' + json[i][j] + '>' + json[i][j] + '</option>');
+                        }
+                    }
+
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+
+    <script>
+        $(document).on('submit', '#post-form', function (e) {
+            e.preventDefault();
+            console.log("1")
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:fill_sentiments_list" %}',
+                data: {
+                    brand: $('#brand').val(),
+                    model: $('#model').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("reviews").innerHTML = "";
+                    var reviews = document.getElementById("reviews")
+                    console.log(json)
+                    for (var i of json.reviews) {
+                        console.log(i[1])
+                        $(reviews).append(''+
+                            '<div class="product-listing-m gray-bg" id="review">'+
+                            '<div style="margin-left: 20px" class="">'+
+                            '<h5><a href="#"></a></h5>'+
+                            '<p class="list-price"style=""><strong>'+ i[5] +' ('+ i[10]+')</strong><i></i></p>'+
+                            '<p class="">'+ i[9] +'<i></i></p>'+
+                            '<ul>'+
+                                '<li><i class="fa fa-star" aria-hidden="true"></i>'+ i[3] +'</li>'+
+                                '<li><i class="fa fa-calendar" aria-hidden="true"></i>'+ i[6] +'</li>'+
+                                '<li><i class="fa fa-car" aria-hidden="true"></i>'+ i[4] +'</li>'+
+                                '<li><i class="fa fa-user" aria-hidden="true"></i>'+ i[7] +'</li>'+
+                            '</ul>'+
+                            '<div class="fa fa-location-arrow"><span> '+ i[8] +'</span>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                        '');
+                    }
+
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+{% endblock %}

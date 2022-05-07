@@ -1,0 +1,62 @@
+{% extends "base_template.html" %}
+{% block main %}
+    {% load static %}
+    <!--Profile-setting-->
+    <section class="user_profile inner_pages">
+        <div class="container">
+            <div class="user_profile_info gray-bg padding_4x4_40">
+                <div class="upload_user_logo"><img src="{% static "images/222x172.jpg" %}" alt="image">
+                    <div class="upload_newlogo">
+                        <input name="upload" type="file">
+                    </div>
+                </div>
+                <div class="dealer_info">
+                    <h5>Import a car's image </h5>
+                    <form action="" id="post-form">
+                        {% csrf_token %}
+                        <div class="form-group col-md-3 col-sm-6">
+                            <button type="submit" value="Submit" class="btn"><i class="fa fa-search"
+                                                                                aria-hidden="true"></i>
+                                Detect
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+                <h5 class="pt-3">Prediction Value :</h5>
+                <div id="prediction">$$$</div>
+            </div>
+
+        </div>
+
+    </section>
+    <!--/Profile-setting-->
+    <script>
+        console.log("1")
+        $(document).on('submit', '#post-form', function (e) {
+            e.preventDefault();
+            console.log("2")
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:detect_car" %}',
+                data: {
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("prediction").innerHTML = "";
+
+                    document.getElementById("prediction").innerHTML = json['result']
+
+                },
+                error: function (xhr, errmsg, err) {
+
+
+                }
+            });
+        })
+    </script>
+
+
+{% endblock %}
