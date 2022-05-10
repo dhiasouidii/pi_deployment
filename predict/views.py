@@ -166,7 +166,7 @@ def predict_price(request):
     range = mean([int(range[0]), int(range[1])])
     if request.POST.get('action') == 'post':
         # Receive data from client
-        category = str(request.POST.get('category')).strip()
+        #category = str(request.POST.get('category')).strip()
         marque = str(request.POST.get('marque')).strip()
         modele = str(request.POST.get('model')).strip()
         transmission = str(request.POST.get('transmission')).strip()
@@ -174,37 +174,37 @@ def predict_price(request):
         annee = int(request.POST.get('year'))
         kilometrage = range
         age = 2022 - annee
-        print(age)
-        category = cat(category)
+        #category = cat(category)
         # Unpickle model
         model = pd.read_pickle(r"D:\esprit\Semestre 2\Projet DS\price_model.pickle")
         scaler = pd.read_pickle(r"D:\esprit\Semestre 2\Projet DS\price_scaler.pickle")
 
-        encode_category = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
+        #encode_category = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
         encode_marque = numpy.load(r"D:\esprit\Semestre 2\Projet DS\marque_classes_price.npy", allow_pickle=True)
         encode_model = numpy.load(r"D:\esprit\Semestre 2\Projet DS\model_classes.npy", allow_pickle=True)
 
-        categoryencoder = LabelEncoder()
+        #categoryencoder = LabelEncoder()
         marqueencoder = LabelEncoder()
         modelencoder = LabelEncoder()
 
-        categoryencoder.classes_ = encode_category
+        #categoryencoder.classes_ = encode_category
         marqueencoder.classes_ = encode_marque
         modelencoder.classes_ = encode_model
 
-        scaled = scaler.transform([[annee, kilometrage, age]])
+        #scaled = scaler.transform([[annee, kilometrage, age]])
+        scaled = scaler.transform([[kilometrage, age]])
         # Make prediction
         result = model.predict([[modelencoder.transform([modele]),
-                                 categoryencoder.transform([category]),
+                                 #categoryencoder.transform([category]),
                                  marqueencoder.transform([marque]),
                                  ref1(transmission),
                                  ref2(carburant),
                                  scaled[0][0],
                                  scaled[0][1],
-                                 scaled[0][2]
+                                 #scaled[0][2]
                                  ]])
         prediction = result[0]
-        PriceResults.objects.create(category=category, marque=marque, transmission=transmission,
+        PriceResults.objects.create(marque=marque, transmission=transmission,
                                     carburant=carburant, annee=annee, kilometrage=kilometrage, age=age,
                                     prediction=str(prediction))
 

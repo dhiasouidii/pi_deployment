@@ -88,16 +88,16 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="form-group col-md-3 col-sm-6">
-                            <div class="select">
-                                <select class="form-control" id="category">
-                                    <option>Select Category</option>
-                                    {% for category in categories %}
-                                        <option value="{{ category }}">{{ category }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
+{#                        <div class="form-group col-md-3 col-sm-6">#}
+{#                            <div class="select">#}
+{#                                <select class="form-control" id="category">#}
+{#                                    <option>Select Category</option>#}
+{#                                    {% for category in categories %}#}
+{#                                        <option value="{{ category }}">{{ category }}</option>#}
+{#                                    {% endfor %}#}
+{#                                </select>#}
+{#                            </div>#}
+{#                        </div>#}
                         <div class="form-group col-md-3 col-sm-6">
                             <div class="select">
                                 <select class="form-control" id="year">
@@ -344,7 +344,7 @@
                 url: '{% url "predict:pricepredict" %}',
                 data: {
                     marque: $('#marque option:selected').val(),
-                    category: $('#category option:selected').val(),
+                    //category: $('#category option:selected').val(),
                     model: $('#model option:selected').val(),
                     transmission: $('#transmission option:selected').val(),
                     carburant: $('#carburant option:selected').val(),

@@ -13,7 +13,7 @@ class FuelResults(models.Model):
 
 
 class PriceResults(models.Model):
-    category = models.CharField(max_length=30)
+    #category = models.CharField(max_length=30)
     marque = models.CharField(max_length=30)
     transmission = models.CharField(max_length=30)
     carburant = models.CharField(max_length=30)
