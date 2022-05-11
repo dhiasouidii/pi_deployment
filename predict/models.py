@@ -16,10 +16,10 @@ class PriceResults(models.Model):
     #category = models.CharField(max_length=30)
     marque = models.CharField(max_length=30)
     transmission = models.CharField(max_length=30)
+    modele = models.CharField(max_length=30,default="null")
     carburant = models.CharField(max_length=30)
     annee = models.IntegerField()
     kilometrage = models.IntegerField()
-    age = models.IntegerField()
     prediction = models.CharField(max_length=30)
 
 

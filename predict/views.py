@@ -27,13 +27,14 @@ warnings.filterwarnings("ignore", category=numpy.VisibleDeprecationWarning)
 
 def index(request):
     marques = numpy.load(r"D:\esprit\Semestre 2\Projet DS\marque_classes_price.npy", allow_pickle=True)
-    models = numpy.load(r"D:\esprit\Semestre 2\Projet DS\model_classes.npy", allow_pickle=True)
-    categories = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
+    models = numpy.load(r"D:\esprit\Semestre 2\Projet DS\model_classes_price.npy", allow_pickle=True)
+    # categories = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
 
     return render(request, 'landing.html',
                   {'marques': marques,
                    'models': models,
-                   'categories': categories})
+                   # 'categories': categories
+                   })
 
 
 def fuel_page(request):
@@ -68,6 +69,26 @@ def get_models(request):
         # Receive data from client
         brand = str(request.POST.get('brand'))
         models = Reviews.objects.filter(make=brand).values_list('model').distinct()
+
+        return JsonResponse({'result': list(models)},
+                            safe=False)
+
+
+def get_models_2(request):
+    if request.POST.get('action') == 'post':
+        # Receive data from client
+        brand = str(request.POST.get('marque'))
+        models = PriceResults.objects.filter(marque=brand).values_list('modele').distinct()
+
+        return JsonResponse({'result': list(models)},
+                            safe=False)
+
+
+def get_models_fuel(request):
+    if request.POST.get('action') == 'post':
+        # Receive data from client
+        brand = str(request.POST.get('marque'))
+        models = PriceResults.objects.filter(marque=brand).values_list('modele').distinct()
 
         return JsonResponse({'result': list(models)},
                             safe=False)
@@ -149,9 +170,9 @@ def ref2(x):
 def cat(x):
     if x == "Budget_Friendly":
         return 0
-    elif x =="Medium_Range":
+    elif x == "Medium_Range":
         return 1
-    elif x =="high_Range":
+    elif x == "high_Range":
         return 2
     else:
         return 3
@@ -164,48 +185,49 @@ def price_page(request):
 def predict_price(request):
     range = request.POST.get('price_range').split(",", 2)
     range = mean([int(range[0]), int(range[1])])
+    print(request.POST.get('model'))
     if request.POST.get('action') == 'post':
         # Receive data from client
-        #category = str(request.POST.get('category')).strip()
-        marque = str(request.POST.get('marque')).strip()
-        modele = str(request.POST.get('model')).strip()
-        transmission = str(request.POST.get('transmission')).strip()
-        carburant = str(request.POST.get('carburant')).strip()
+        # category = str(request.POST.get('category')).strip()
+        marque = str(request.POST.get('marque'))
+        modele = str(request.POST.get('model'))
+        transmission = str(request.POST.get('transmission'))
+        carburant = str(request.POST.get('carburant'))
         annee = int(request.POST.get('year'))
         kilometrage = range
         age = 2022 - annee
-        #category = cat(category)
+        # category = cat(category)
         # Unpickle model
         model = pd.read_pickle(r"D:\esprit\Semestre 2\Projet DS\price_model.pickle")
         scaler = pd.read_pickle(r"D:\esprit\Semestre 2\Projet DS\price_scaler.pickle")
 
-        #encode_category = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
+        # encode_category = numpy.load(r"D:\esprit\Semestre 2\Projet DS\category_classes.npy", allow_pickle=True)
         encode_marque = numpy.load(r"D:\esprit\Semestre 2\Projet DS\marque_classes_price.npy", allow_pickle=True)
         encode_model = numpy.load(r"D:\esprit\Semestre 2\Projet DS\model_classes.npy", allow_pickle=True)
 
-        #categoryencoder = LabelEncoder()
+        # categoryencoder = LabelEncoder()
         marqueencoder = LabelEncoder()
         modelencoder = LabelEncoder()
 
-        #categoryencoder.classes_ = encode_category
+        # categoryencoder.classes_ = encode_category
         marqueencoder.classes_ = encode_marque
         modelencoder.classes_ = encode_model
 
-        #scaled = scaler.transform([[annee, kilometrage, age]])
+        # scaled = scaler.transform([[annee, kilometrage, age]])
         scaled = scaler.transform([[kilometrage, age]])
         # Make prediction
         result = model.predict([[modelencoder.transform([modele]),
-                                 #categoryencoder.transform([category]),
+                                 # categoryencoder.transform([category]),
                                  marqueencoder.transform([marque]),
                                  ref1(transmission),
                                  ref2(carburant),
                                  scaled[0][0],
                                  scaled[0][1],
-                                 #scaled[0][2]
+                                 # scaled[0][2]
                                  ]])
         prediction = result[0]
-        PriceResults.objects.create(marque=marque, transmission=transmission,
-                                    carburant=carburant, annee=annee, kilometrage=kilometrage, age=age,
+        PriceResults.objects.create(marque=marque, transmission=transmission,modele=modele,
+                                    carburant=carburant, annee=annee, kilometrage=kilometrage,
                                     prediction=str(prediction))
 
         return JsonResponse({'result': str(prediction)},
@@ -277,8 +299,11 @@ def detect_car(request):
 
     return JsonResponse({'result': incrementation + ' TUNIS ' + nenregistrement},
                         safe=False)
+
+
 def dashboard_2(request):
-    return render(request,"dashboard_2.html")
+    return render(request, "dashboard_2.html")
+
 
 def test(request):
-    return render(request,"index.html")
+    return render(request, "index.html")

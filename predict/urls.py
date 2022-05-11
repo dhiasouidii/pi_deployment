@@ -16,6 +16,7 @@ urlpatterns = [
     path('fuelpredict', views.predict_fuel, name='fuelpredict'),
     path('pricepredict', views.predict_price, name='pricepredict'),
     path('get_selected_model', views.get_models, name='get_selected_model'),
+    path('get_selected_model_2', views.get_models_2, name='get_selected_model_2'),
     path('fill_sentiments_list', views.fill_sentiments_list, name='fill_sentiments_list'),
 
     path('dashboard', views.dashboard, name='dashboard'),
