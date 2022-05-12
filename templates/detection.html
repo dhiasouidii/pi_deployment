@@ -1,11 +1,35 @@
 {% extends "base_template.html" %}
 {% block main %}
     {% load static %}
+    <div class="modal fade" id="exammarqueeModal" tabindex="-1" role="dialog" aria-labelledby="exammarqueeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="pt-3">Prediction Result:</h5>
+                    <div>The chosen car is:
+                    </div>
+<div id="loader" style="font-weight: bold;margin-top: 2px;font-size: larger">Loading car info...</div>
+                    <div id="prediction" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <div id="make" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <div id="date" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <div id="fuel" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <div id="power" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <div id="engine" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+
+                    <button type="button" style="display: flex;justify-content: flex-end;margin-top: 20px"
+                            class="btn btn-secondary" data-dismiss="modal">Close
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
     <!--Profile-setting-->
     <section class="user_profile inner_pages">
         <div class="container">
             <div class="user_profile_info gray-bg padding_4x4_40">
-                <div class="upload_user_logo"><img src="{% static "images/addmore_img.jpg" %}" alt="image">
+                <div class="upload_user_logo" style="height: 200px;">
                     <div class="upload_newlogo">
                         <input name="upload" type="file">
                     </div>
@@ -15,16 +39,15 @@
                     <form action="" id="post-form">
                         {% csrf_token %}
                         <div class="form-group col-md-3 col-sm-6">
-                            <button type="submit" value="Submit" class="btn"><i class="fa fa-search"
-                                                                                aria-hidden="true"></i>
+                            <button type="submit" value="Submit" class="btn" data-toggle="modal"
+                                    data-target="#exammarqueeModal"><i class="fa fa-search"
+                                                                       aria-hidden="true"></i>
                                 Detect
                             </button>
                         </div>
                     </form>
 
                 </div>
-                <h5 class="pt-3">Prediction Value :</h5>
-                <div id="prediction">$$$</div>
             </div>
 
         </div>
@@ -45,9 +68,18 @@
                     action: 'post'
                 },
                 success: function (json) {
-                    document.getElementById("prediction").innerHTML = "";
 
-                    document.getElementById("prediction").innerHTML = json['result']
+                    console.log(json.info)
+                    console.log(json.info[0])
+                    document.getElementById("prediction").innerHTML = "";
+                    document.getElementById("loader").innerHTML = "";
+
+                    document.getElementById("prediction").innerHTML = 'PLATE NUMBER: '+json['result']
+                    document.getElementById("make").innerHTML = 'MAKE: '+json.info[0]
+                    document.getElementById("date").innerHTML = 'CIRCULATION DATE: '+json.info[1]
+                    document.getElementById("fuel").innerHTML = 'FUEL TYPE: '+json.info[2]
+                    document.getElementById("power").innerHTML = 'HORSEPOWER: '+json.info[3]
+                    document.getElementById("engine").innerHTML = 'ENGINE TYPE: '+json.info[4]
 
                 },
                 error: function (xhr, errmsg, err) {

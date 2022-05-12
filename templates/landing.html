@@ -1,7 +1,22 @@
 {% extends "base_template.html" %}
 {% block main %}
     {% load static %}
+    <div class="modal fade" id="exammarqueeModal" tabindex="-1" role="dialog" aria-labelledby="exammarqueeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="pt-3">Prediction Result:</h5>
+                    <div>The chosen car price is:</div>
+                    <div id="prediction" style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                    <button type="button" style="display: flex;justify-content: flex-end;margin-top: 20px"
+                            class="btn btn-secondary" data-dismiss="modal">Close
+                    </button>
 
+                </div>
+            </div>
+        </div>
+    </div>
     <!--Banner-->
     <section id="banner2">
         <div id="carousel-example-generic" class="carousel slide" data-ride="carousel">
@@ -178,16 +193,17 @@
                         </div>
 
                         <div class="form-group col-md-3 col-sm-6">
-                            <button type="submit" value="Submit" class="btn btn-block"><i class="fa fa-search"
-                                                                                          aria-hidden="true"></i>
+                            <button type="submit" value="Submit" class="btn btn-block"
+                                    data-toggle="modal"
+                                    data-target="#exammarqueeModal"><i class="fa fa-search"
+                                                                       aria-hidden="true"></i>
                                 Estimate
                             </button>
                         </div>
                     </form>
 
                 </div>
-                <h5 class="pt-3">Prediction Value :</h5>
-                <div id="prediction">$$$</div>
+
             </div>
         </div>
     </section>
@@ -199,10 +215,10 @@
         <div class="container">
             <div class="section-header text-center">
                 <h2>Welcome to Priceify</h2>
-                <p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered
-                    alteration in some form, by injected humour, or randomised words which don't look even slightly
-                    believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't
-                    anything embarrassing hidden in the middle of text. </p>
+                <p>Priceify, the n°1 automobile expert in Tunisia! You want to sell your used car at the best price?,
+                    You want to but aused car at the best price? You want to know how much fuel your car use? Only one
+                    address : Pricefy.
+                </p>
             </div>
 
             <div class="row">
@@ -211,8 +227,7 @@
                         <div class="icon_box">
                             <i class="fa fa-money" aria-hidden="true"></i>
                         </div>
-                        <h5>Best Price</h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                        <h5>Accurate Price</h5>
                     </div>
                 </div>
 
@@ -221,8 +236,7 @@
                         <div class="icon_box">
                             <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
                         </div>
-                        <h5>Faster Buy & Sell</h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                        <h5>Sentiment Reports</h5>
                     </div>
                 </div>
 
@@ -231,8 +245,7 @@
                         <div class="icon_box">
                             <i class="fa fa-history" aria-hidden="true"></i>
                         </div>
-                        <h5>Free Support</h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                        <h5>Fuel Estimation</h5>
                     </div>
                 </div>
 
@@ -241,8 +254,7 @@
                         <div class="icon_box">
                             <i class="fa fa-users" aria-hidden="true"></i>
                         </div>
-                        <h5>Professional Dealers</h5>
-                        <p>Lorem Ipsum is simply dummy text of the printing and typesetting industry. </p>
+                        <h5>24/7 Support</h5>
                     </div>
                 </div>
             </div>
@@ -283,9 +295,11 @@
                     </div>
                     <div><a href="#"><img src="{% static "images/citroen-01.png" %}" class="img-responsive" alt="image"></a>
                     </div>
-                    <div><a href="#"><img src="{% static "images/ford-01.png" %}" class="img-responsive" alt="image"></a>
+                    <div><a href="#"><img src="{% static "images/ford-01.png" %}" class="img-responsive"
+                                          alt="image"></a>
                     </div>
-                    <div><a href="#"><img src="{% static "images/mercedes-01.png" %}" class="img-responsive" alt="image"></a>
+                    <div><a href="#"><img src="{% static "images/mercedes-01.png" %}" class="img-responsive"
+                                          alt="image"></a>
                     </div>
                 </div>
             </div>
@@ -342,7 +356,7 @@
                 success: function (json) {
 
                     document.forms["post-form"].reset();
-                    document.getElementById("prediction").innerHTML = json['result']
+                    document.getElementById("prediction").innerHTML = json['result'] + ' TND'
                 },
                 error: function (xhr, errmsg, err) {
 
@@ -352,5 +366,26 @@
         })
     </script>
 
+    <script>!(function () {
+        let e = document.createElement("script"),
+            t = document.head || document.getElementsByTagName("head")[0];
+        (e.src =
+            "https://cdn.jsdelivr.net/npm/rasa-webchat@1.x.x/lib/index.js"),
+            // Replace 1.x.x with the version that you want
+            (e.async = !0),
+            (e.onload = () => {
+                window.WebChat.default(
+                    {
+                        initPayLoad: '/greet',
+                        customData: {language: "en"},
+                        socketUrl: "http://localhost:5005",
+                        // add other props here
+                    },
+                    null
+                );
+            }),
+            t.insertBefore(e, t.firstChild);
+    })();
+    </script>
 
 {% endblock %}

@@ -1,6 +1,20 @@
 {% extends "base_template.html" %}
 {% block main %}
     {% load static %}
+    <div class="modal fade" id="exammarqueeModal" tabindex="-1" role="dialog" aria-labelledby="exammarqueeModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <h5 class="pt-3">Prediction:</h5>
+                    <div id="prediction"style="font-size: larger;font-weight: bold;margin-top: 5px"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary"style="display: flex;justify-content: flex-end;margin-top: 20px" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Intro -->
     <section id="intro-3" style="margin-top: 100px;padding-bottom:150px">
@@ -36,9 +50,6 @@
                                     <div class="select">
                                         <select class="form-control" id="voiture">
                                             <option value="">Select Model</option>
-                                            {% for model in voitures %}
-                                                <option value="{{ model }}">{{ model }}</option>
-                                            {% endfor %}
                                         </select>
                                     </div>
                                 </div>
@@ -137,22 +148,21 @@
                                     </div>
                                 </div>
                                 <div class="form-group col-md-12">
-                                    <button type="submit" class="btn btn-block"><i class="fa fa-search"
-                                                                                   aria-hidden="true"></i> Estimate
+                                    <button type="submit" class="btn btn-block" data-toggle="modal"
+                                            data-target="#exammarqueeModal"><i class="fa fa-search"
+                                                                               aria-hidden="true"></i> Estimate
                                     </button>
                                 </div>
                             </form>
-
                         </div>
-                        <h5 class="pt-3">Prediction Value /100KM :</h5>
-                        <div id="prediction">.</div>
                     </div>
 
 
                 </div>
                 <div class="col-md-7">
                     <div class="intro-img-wp">
-                        <img style="height: 500px;width: auto;margin-top: 10px;margin-left: 30px" src="{% static "images/pump.png" %}" alt="image">
+                        <img style="height: 500px;width: auto;margin-top: 10px;margin-left: 30px"
+                             src="{% static "images/pump.png" %}" alt="image">
                     </div>
                 </div>
 
@@ -178,7 +188,7 @@
                 },
                 success: function (json) {
                     document.forms["post-form"].reset();
-                    document.getElementById("prediction").innerHTML = json['result']
+                    document.getElementById("prediction").innerHTML = json['result'] + ' liters/100KM'
                 },
                 error: function (xhr, errmsg, err) {
 
@@ -186,5 +196,60 @@
             });
         })
     </script>
+    <script>
+        $("#marque").change(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:get_models_fuel" %}',
+                data: {
+                    marque: $('#marque').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("voiture").innerHTML = "";
+                    select = document.getElementById("voiture")
+                    for (var i in json) {
+                        for (var j in json[i]) {
+                            $(select).append('<option value=' + json[i][j] + '>' + json[i][j] + '</option>');
+                        }
+                    }
+
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+    <script>
+        $("#voiture").change(function (e) {
+            e.preventDefault();
+            $.ajax({
+                type: 'POST',
+                url: '{% url "predict:get_moteurs_fuel" %}',
+                data: {
+                    voiture: $('#voiture').val(),
+                    csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                    action: 'post'
+                },
+                success: function (json) {
+                    document.getElementById("moteur").innerHTML = "";
+                    select = document.getElementById("moteur")
+                    for (var i in json) {
+                        for (var j in json[i]) {
+                            $(select).append('<option value=' + json[i][j] + '>' + json[i][j] + '</option>');
+                        }
+                    }
+
+                },
+                error: function (xhr, errmsg, err) {
+
+                }
+            });
+        })
+    </script>
+
 
 {% endblock %}

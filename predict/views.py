@@ -10,7 +10,18 @@ import warnings
 import numpy
 from statistics import mean
 from django.core.paginator import Paginator
-
+# Imports for our project
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
+from bs4 import BeautifulSoup
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+import pymongo
+import requests
+import urllib.request
+import os
 import numpy as np
 import imutils
 import easyocr
@@ -88,14 +99,22 @@ def get_models_fuel(request):
     if request.POST.get('action') == 'post':
         # Receive data from client
         brand = str(request.POST.get('marque'))
-        models = PriceResults.objects.filter(marque=brand).values_list('modele').distinct()
+        models = FuelResults.objects.filter(marque=brand).values_list('voiture').distinct()
 
         return JsonResponse({'result': list(models)},
                             safe=False)
 
 
+def get_moteurs_fuel(request):
+    if request.POST.get('action') == 'post':
+        # Receive data from client
+        voiture = str(request.POST.get('voiture'))
+        moteurs = FuelResults.objects.filter(voiture=voiture).values_list('moteur').distinct()
+        return JsonResponse({'result': list(moteurs)},
+                            safe=False)
+
+
 def fill_sentiments_list(request):
-    print(request.POST.get('brand'))
     if request.POST.get('action') == 'post':
         # Receive data from client
         brand = str(request.POST.get('brand'))
@@ -136,7 +155,7 @@ def predict_fuel(request):
                                  cv,
                                  year,
                                  voitureencoder.transform([voiture])]])
-        prediction = result[0]
+        prediction = "{:.2f}".format(result[0])
 
         FuelResults.objects.create(moteur=moteur, carburant=carburant, marque=marque,
                                    cv=cv, year=year, voiture=voiture, prediction=str(prediction))
@@ -185,7 +204,6 @@ def price_page(request):
 def predict_price(request):
     range = request.POST.get('price_range').split(",", 2)
     range = mean([int(range[0]), int(range[1])])
-    print(request.POST.get('model'))
     if request.POST.get('action') == 'post':
         # Receive data from client
         # category = str(request.POST.get('category')).strip()
@@ -225,8 +243,8 @@ def predict_price(request):
                                  scaled[0][1],
                                  # scaled[0][2]
                                  ]])
-        prediction = result[0]
-        PriceResults.objects.create(marque=marque, transmission=transmission,modele=modele,
+        prediction = int(result[0])
+        PriceResults.objects.create(marque=marque, transmission=transmission, modele=modele,
                                     carburant=carburant, annee=annee, kilometrage=kilometrage,
                                     prediction=str(prediction))
 
@@ -248,7 +266,7 @@ def detection(request):
 
 def detect_car(request):
     # Read in image, Grayscale and Blur
-    image = cv2.imread(r'D:\car.png')
+    image = cv2.imread(r'D:\esprit\car.png')
     # convert BGR to Gray
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     bfilter = cv2.bilateralFilter(gray, 11, 17, 17)
@@ -273,7 +291,6 @@ def detect_car(request):
         if len(approx) == 4:
             location = approx
             break
-    print(location)
     # blank mask same shape as the gray image
     mask = np.zeros(gray.shape, np.uint8)
     # draw contour "location"
@@ -290,15 +307,75 @@ def detect_car(request):
     processed_image = gray[minX:maxX + 1, minY:maxY + 1]
     reader = easyocr.Reader(['en'])
     result = reader.readtext(processed_image)
-    print(result)
     incrementation = result[0][-2]
     incrementation = incrementation.replace('[', "")
     nenregistrement = result[1][-2]
     print("numéro d'incrémentation:", incrementation)
     print("numéro d'enregistrement:", nenregistrement)
+    info=scraping(nenregistrement, incrementation)
 
-    return JsonResponse({'result': incrementation + ' TUNIS ' + nenregistrement},
+
+
+
+    return JsonResponse({'result': incrementation + ' TUNIS ' + nenregistrement,
+                         'info':info},
                         safe=False)
+
+
+def scraping(enregist, increm):
+    IDNUM = 'numSerie'
+    IDNUMCAR = 'numCar'
+    ENTER = '//*[@id="mat-search-btn-container"]/div/button'
+    MAKE = '//*[@id="detail-car"]/div/div[1]/div[1]/div[3]'
+    DATE = '//*[@id="detail-car"]/div/div[2]/div[1]/div[3]'
+    FUEL = '//*[@id="detail-car"]/div/div[1]/div[2]/div[3]'
+    POWER = '//*[@id="detail-car"]/div/div[2]/div[2]/div[3]'
+    TYPE = '//*[@id="detail-car"]/div/div[3]/div[1]/div[3]'
+    BODY = '//*[@id="detail-car"]/div/div[4]/div[1]/div[3]'
+    ENGINE = '//*[@id="detail-car"]/div/div[3]/div[2]/div[3]'
+    CYLINDERCAP = '//*[@id="detail-car"]/div/div[4]/div[2]/div[3]'
+
+    WEBSITE_URL = 'https://vidange.tn/'
+    # Setting up our Web Driver For Selenium
+    # I am going to use firefox web driver geckodriver.exe
+    driver_service = Service(r'C:\Program Files\geckodriver.exe')
+    options = Options()
+    # All the work is done in the background : headless=True
+    options.headless = True
+    # Passing the parameters to the browser
+    browser = webdriver.Firefox(service=driver_service, options=options)
+
+    browser.get(WEBSITE_URL)
+
+    SERIAL = browser.find_element_by_id(IDNUM)
+    SERIAL.click()
+    SERIAL.send_keys(increm)
+    NUMCAR = browser.find_element_by_id(IDNUMCAR)
+    NUMCAR.click()
+    NUMCAR.send_keys(enregist)
+    sleep(5)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+    NUMCAR.send_keys(Keys.ENTER)
+
+    sleep(5)
+    MAKE = browser.find_element_by_xpath(MAKE).text
+    DATE = browser.find_element_by_xpath(DATE).text
+    FUEL = browser.find_element_by_xpath(FUEL).text
+    POWER = browser.find_element_by_xpath(POWER).text
+    TYPE = browser.find_element_by_xpath(TYPE).text
+    BODY = browser.find_element_by_xpath(BODY).text
+    ENGINE = browser.find_element_by_xpath(ENGINE).text
+    CYLINDERCAP = browser.find_element_by_xpath(CYLINDERCAP).text
+
+    return [MAKE,DATE,FUEL,POWER,ENGINE]
 
 
 def dashboard_2(request):
