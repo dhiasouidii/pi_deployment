@@ -66,6 +66,7 @@ def sentiments(request):
     data = json.loads(json_records)
     paginator = Paginator(data, 10)
     page = paginator.get_page(1)
+    haha = "haha"
 
     return render(request, 'sentiment_analysis.html',
                   {
